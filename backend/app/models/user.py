@@ -19,3 +19,4 @@ class User(Base):
     created_rooms = relationship("ChatRoom", back_populates="creator")
     sent_messages = relationship("Message", back_populates="sender")
     rooms = relationship("ChatRoom", secondary="room_memberships", back_populates="members")
+    password_reset_tokens = relationship("PasswordResetToken", back_populates="user")

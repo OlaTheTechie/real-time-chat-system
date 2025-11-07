@@ -2,11 +2,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.v1.api import api_router
+from app.chat.ws_routes import router as ws_router
 from app.database.database import engine
-from app import models
+from app.models import Base
 
 # create database tables
-models.Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -26,6 +27,9 @@ app.add_middleware(
 
 # include api router
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+# include websocket router
+app.include_router(ws_router)
 
 @app.get("/")
 async def root():

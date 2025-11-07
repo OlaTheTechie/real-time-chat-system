@@ -9,7 +9,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from app.database.database import Base
-from app.models import models  # import all models
+from app.models import User, ChatRoom, Message, PasswordResetToken  # import all models
 
 # this is the alembic config object, which provides
 # access to the values within the .ini file in use.
