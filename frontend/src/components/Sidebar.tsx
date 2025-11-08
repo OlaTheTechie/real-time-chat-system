@@ -44,12 +44,12 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateChat, currentRoomId }) => {
   });
 
   return (
-    <div className="w-80 bg-white border-r border-gray-200 flex flex-col h-full">
+    <div className="w-80 bg-white border-r border-gray-200 flex flex-col h-full shadow-sm">
       {/* Search and Create Button */}
-      <div className="p-4 border-b border-gray-200">
+      <div className="p-4 border-b border-gray-200 bg-white">
         <button
           onClick={onCreateChat}
-          className="w-full px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors mb-3"
+          className="w-full px-4 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all shadow-sm hover:shadow-md mb-3"
         >
           + Create New Chat
         </button>
@@ -61,7 +61,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateChat, currentRoomId }) => {
             placeholder="Search chats..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2 pl-10 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 pl-10 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all shadow-sm hover:shadow-md"
           />
           <svg
             className="absolute left-3 top-2.5 w-4 h-4 text-gray-400"
@@ -106,13 +106,15 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateChat, currentRoomId }) => {
             )}
           </div>
         ) : (
-          <div className="divide-y divide-gray-200">
+          <div className="divide-y divide-gray-100">
             {filteredRooms.map((room) => (
               <div
                 key={room.id}
                 onClick={() => handleRoomClick(room.id)}
-                className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
-                  currentRoomId === room.id ? 'bg-blue-50 border-l-4 border-blue-600' : ''
+                className={`p-4 cursor-pointer transition-all duration-200 border-l-4 animate-fade-in ${
+                  currentRoomId === room.id
+                    ? 'bg-indigo-50 border-indigo-600 shadow-sm'
+                    : 'border-transparent hover:bg-indigo-50 hover:border-indigo-200'
                 }`}
               >
                 <div className="flex items-start justify-between mb-1">
@@ -145,13 +147,18 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateChat, currentRoomId }) => {
 
                 {room.last_message && (
                   <p className="text-xs text-gray-600 truncate">
-                    {room.last_message.sender_username}: {room.last_message.content}
+                    <span className="font-medium">{room.last_message.sender_username}:</span>{' '}
+                    {room.last_message.content}
                   </p>
+                )}
+
+                {!room.last_message && (
+                  <p className="text-xs text-gray-400 italic">No messages yet</p>
                 )}
 
                 {room.unread_count && room.unread_count > 0 && (
                   <div className="mt-2">
-                    <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-blue-600 rounded-full">
+                    <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-indigo-600 rounded-full shadow-sm">
                       {room.unread_count > 99 ? '99+' : room.unread_count}
                     </span>
                   </div>

@@ -52,8 +52,8 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, disabled = f
   const showCharLimit = message.length > MAX_LENGTH * 0.8;
 
   return (
-    <div className="border-t border-gray-200 bg-white p-4">
-      <div className="flex items-end gap-2">
+    <div className="border-t border-gray-200 bg-white p-4 shadow-lg">
+      <div className="flex items-end gap-3">
         {/* Text input field */}
         <div className="flex-1">
           <textarea
@@ -63,9 +63,9 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, disabled = f
             placeholder="Type a message..."
             disabled={disabled || isSending}
             rows={1}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none disabled:bg-gray-100 disabled:cursor-not-allowed"
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none disabled:bg-gray-100 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md"
             style={{
-              minHeight: '42px',
+              minHeight: '48px',
               maxHeight: '120px',
               overflowY: 'auto',
             }}
@@ -74,8 +74,8 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, disabled = f
           {/* Character limit indicator */}
           {showCharLimit && (
             <div
-              className={`text-xs mt-1 ${
-                remainingChars < 100 ? 'text-red-500' : 'text-gray-500'
+              className={`text-xs mt-1.5 px-1 ${
+                remainingChars < 100 ? 'text-red-500 font-medium' : 'text-gray-500'
               }`}
             >
               {remainingChars} characters remaining
@@ -87,13 +87,13 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, disabled = f
         <button
           onClick={handleSend}
           disabled={!message.trim() || disabled || isSending}
-          className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-          style={{ minHeight: '42px' }}
+          className="px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md disabled:shadow-none"
+          style={{ minHeight: '48px' }}
         >
           {isSending ? (
             <span className="flex items-center gap-2">
               <svg
-                className="animate-spin h-4 w-4"
+                className="animate-spin h-5 w-5"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -114,7 +114,9 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, disabled = f
               </svg>
             </span>
           ) : (
-            'Send'
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
           )}
         </button>
       </div>

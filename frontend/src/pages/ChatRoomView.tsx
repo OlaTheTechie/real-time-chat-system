@@ -9,7 +9,11 @@ import OnlineStatusIndicator from '../components/OnlineStatusIndicator';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import CreateChatModal from '../components/CreateChatModal';
+import LoadingSpinner from '../components/LoadingSpinner';
+import ErrorMessage from '../components/ErrorMessage';
+import Toast from '../components/Toast';
 import { Message } from '../types';
+import { useToast } from '../hooks/useToast';
 
 const ChatRoomView: React.FC = () => {
   const { roomId } = useParams<{ roomId: string }>();
@@ -26,6 +30,7 @@ const ChatRoomView: React.FC = () => {
   const [showMemberList, setShowMemberList] = useState(false);
   const [showSidebar] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const { toasts, hideToast } = useToast();
 
   // Get access token for WebSocket
   const token = localStorage.getItem('access_token');
@@ -132,22 +137,22 @@ const ChatRoomView: React.FC = () => {
   if (isLoading && !currentRoom) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading chat room...</p>
-        </div>
+        <LoadingSpinner size="lg" text="Loading chat room..." />
       </div>
     );
   }
 
   if (error && !currentRoom) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">{error}</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <div className="max-w-md w-full">
+          <ErrorMessage
+            message={error}
+            onRetry={() => roomId && selectRoom(parseInt(roomId, 10))}
+          />
           <button
             onClick={handleBackToList}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+            className="mt-4 w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
           >
             Back to Chat List
           </button>
@@ -158,12 +163,25 @@ const ChatRoomView: React.FC = () => {
 
   if (!currentRoom) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
         <div className="text-center">
-          <p className="text-gray-600 mb-4">Room not found</p>
+          <svg
+            className="mx-auto h-16 w-16 text-gray-300 mb-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+            />
+          </svg>
+          <p className="text-gray-600 mb-4 text-lg">Room not found</p>
           <button
             onClick={handleBackToList}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+            className="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all shadow-sm hover:shadow-md"
           >
             Back to Chat List
           </button>
@@ -278,27 +296,37 @@ const ChatRoomView: React.FC = () => {
           {/* Messages container */}
           <div
             ref={messagesContainerRef}
-            className="flex-1 overflow-y-auto px-4 py-4"
+            className="flex-1 overflow-y-auto px-4 py-4 bg-gradient-to-b from-gray-50 to-white"
           >
         {/* Load more button */}
         {messages.length > 0 && hasMoreMessages && (
-          <div className="text-center mb-4">
+          <div className="text-center mb-4 animate-fade-in">
             <button
               onClick={handleLoadMore}
               disabled={isLoadingMore}
-              className="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm bg-white text-gray-700 rounded-lg hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed shadow-sm border border-gray-200 transition-all hover:shadow-md"
             >
-              {isLoadingMore ? 'Loading...' : 'Load More Messages'}
+              {isLoadingMore ? (
+                <span className="flex items-center gap-2">
+                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Loading...
+                </span>
+              ) : (
+                'Load More Messages'
+              )}
             </button>
           </div>
         )}
 
         {/* Empty state */}
         {messages.length === 0 && !isLoading && (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center text-gray-500">
+          <div className="flex items-center justify-center h-full animate-fade-in">
+            <div className="text-center text-gray-400">
               <svg
-                className="w-16 h-16 mx-auto mb-4 text-gray-300"
+                className="w-20 h-20 mx-auto mb-4 text-gray-300"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -306,24 +334,26 @@ const ChatRoomView: React.FC = () => {
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2}
+                  strokeWidth={1.5}
                   d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                 />
               </svg>
-              <p className="text-lg">No messages yet</p>
+              <p className="text-lg font-medium text-gray-500">No messages yet</p>
               <p className="text-sm mt-1">Start the conversation!</p>
             </div>
           </div>
         )}
 
         {/* Messages list */}
-        {messages.map((message) => (
-          <MessageBubble
-            key={message.id}
-            message={message}
-            isOwnMessage={message.sender_id === user?.id}
-          />
-        ))}
+        <div className="space-y-2">
+          {messages.map((message) => (
+            <MessageBubble
+              key={message.id}
+              message={message}
+              isOwnMessage={message.sender_id === user?.id}
+            />
+          ))}
+        </div>
 
             {/* Scroll anchor */}
             <div ref={messagesEndRef} />
@@ -332,21 +362,38 @@ const ChatRoomView: React.FC = () => {
           {/* Message input */}
           <MessageInput onSendMessage={handleSendMessage} disabled={isLoading} />
 
-          {/* Error toast */}
-          {error && (
-            <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-md shadow-lg">
-              {error}
-            </div>
-          )}
-          
-          {/* WebSocket error toast */}
-          {wsError && (
-            <div className="fixed bottom-32 left-1/2 transform -translate-x-1/2 bg-orange-500 text-white px-4 py-2 rounded-md shadow-lg">
-              WebSocket: {wsError} (Using REST fallback)
-            </div>
-          )}
         </div>
       </div>
+
+      {/* Toast Notifications */}
+      {toasts.map((toast) => (
+        <Toast
+          key={toast.id}
+          message={toast.message}
+          type={toast.type}
+          onClose={() => hideToast(toast.id)}
+        />
+      ))}
+
+      {/* Error toast */}
+      {error && (
+        <Toast
+          message={error}
+          type="error"
+          onClose={() => {}}
+          duration={5000}
+        />
+      )}
+      
+      {/* WebSocket error toast */}
+      {wsError && (
+        <Toast
+          message={`WebSocket: ${wsError} (Using REST fallback)`}
+          type="warning"
+          onClose={() => setWsError(null)}
+          duration={5000}
+        />
+      )}
 
       {/* Create Chat Modal */}
       <CreateChatModal
