@@ -1,25 +1,61 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { ChatProvider } from './context/ChatContext';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import PasswordReset from './pages/PasswordReset';
+import ChatRoomList from './pages/ChatRoomList';
+import ChatRoomView from './pages/ChatRoomView';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <AuthProvider>
+        <ChatProvider>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/password-reset" element={<PasswordReset />} />
+
+            {/* Protected routes */}
+            <Route
+              path="/chat"
+              element={
+                <ProtectedRoute>
+                  <ChatRoomList />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/chat/:roomId"
+              element={
+                <ProtectedRoute>
+                  <ChatRoomView />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Redirect root to chat if authenticated, otherwise login */}
+            <Route path="/" element={<Navigate to="/chat" replace />} />
+
+            {/* 404 page */}
+            <Route
+              path="*"
+              element={
+                <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                  <div className="text-center">
+                    <h1 className="text-6xl font-bold text-gray-900">404</h1>
+                    <p className="mt-2 text-xl text-gray-600">Page not found</p>
+                  </div>
+                </div>
+              }
+            />
+          </Routes>
+        </ChatProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 

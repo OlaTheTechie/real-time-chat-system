@@ -1,5 +1,15 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { AuthResponse, User, RegisterData, LoginData, ApiError } from '../types';
+import {
+  AuthResponse,
+  User,
+  RegisterData,
+  LoginData,
+  ApiError,
+  ChatRoom,
+  CreateRoomData,
+  Message,
+  MessageListResponse,
+} from '../types';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
 
@@ -153,6 +163,72 @@ export const authApi = {
 
   getCurrentUser: async (): Promise<User> => {
     const response = await apiClient.get<User>('/api/v1/auth/me');
+    return response.data;
+  },
+
+  requestPasswordReset: async (email: string): Promise<{ message: string }> => {
+    const response = await apiClient.post<{ message: string }>(
+      '/api/v1/auth/password-reset',
+      { email }
+    );
+    return response.data;
+  },
+
+  confirmPasswordReset: async (
+    token: string,
+    newPassword: string
+  ): Promise<{ message: string }> => {
+    const response = await apiClient.post<{ message: string }>(
+      '/api/v1/auth/password-reset-confirm',
+      { token, new_password: newPassword }
+    );
+    return response.data;
+  },
+};
+
+// Chat API functions
+export const chatApi = {
+  getChatRooms: async (): Promise<ChatRoom[]> => {
+    const response = await apiClient.get<ChatRoom[]>('/api/v1/chat/rooms');
+    return response.data;
+  },
+
+  createChatRoom: async (roomData: CreateRoomData): Promise<ChatRoom> => {
+    const response = await apiClient.post<ChatRoom>('/api/v1/chat/rooms', roomData);
+    return response.data;
+  },
+
+  getRoomDetails: async (roomId: number): Promise<ChatRoom> => {
+    const response = await apiClient.get<ChatRoom>(`/api/v1/chat/rooms/${roomId}`);
+    return response.data;
+  },
+
+  getMessages: async (
+    roomId: number,
+    page: number = 1,
+    pageSize: number = 50
+  ): Promise<MessageListResponse> => {
+    const response = await apiClient.get<MessageListResponse>(
+      `/api/v1/chat/rooms/${roomId}/messages`,
+      {
+        params: { page, page_size: pageSize },
+      }
+    );
+    return response.data;
+  },
+
+  sendMessage: async (roomId: number, content: string): Promise<Message> => {
+    const response = await apiClient.post<Message>(
+      `/api/v1/chat/rooms/${roomId}/messages`,
+      { content, message_type: 'text' }
+    );
+    return response.data;
+  },
+
+  getAllUsers: async (): Promise<User[]> => {
+    const response = await apiClient.get<User[]>('/api/v1/admin/users', {
+      params: { limit: 1000 },
+    });
     return response.data;
   },
 };
