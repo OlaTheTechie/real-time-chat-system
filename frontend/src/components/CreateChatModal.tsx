@@ -24,12 +24,12 @@ const CreateChatModal: React.FC<CreateChatModalProps> = ({ isOpen, onClose }) =>
   const [error, setError] = useState<string | null>(null);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
 
-  // Load users when modal opens
+  // load users when modal opens
   useEffect(() => {
     if (isOpen) {
       loadUsers();
     } else {
-      // Reset form when modal closes
+      // reset form when modal closes
       setRoomType('one_to_one');
       setRoomName('');
       setSearchQuery('');
@@ -42,7 +42,7 @@ const CreateChatModal: React.FC<CreateChatModalProps> = ({ isOpen, onClose }) =>
     setIsLoadingUsers(true);
     try {
       const users = await chatApi.getAllUsers();
-      // Filter out current user
+      // filter out current user
       const otherUsers = users.filter((u) => u.id !== currentUser?.id);
       setAllUsers(otherUsers);
     } catch (err: any) {
@@ -63,7 +63,7 @@ const CreateChatModal: React.FC<CreateChatModalProps> = ({ isOpen, onClose }) =>
       if (prev.includes(userId)) {
         return prev.filter((id) => id !== userId);
       } else {
-        // For one-to-one, only allow one selection
+        // for one-to-one, only allow one selection
         if (roomType === 'one_to_one') {
           return [userId];
         }
@@ -75,7 +75,7 @@ const CreateChatModal: React.FC<CreateChatModalProps> = ({ isOpen, onClose }) =>
   const handleCreate = async () => {
     setError(null);
 
-    // Validation
+    // validation
     if (selectedUserIds.length === 0) {
       setError('Please select at least one user');
       return;
@@ -100,7 +100,7 @@ const CreateChatModal: React.FC<CreateChatModalProps> = ({ isOpen, onClose }) =>
         member_ids: selectedUserIds,
       });
 
-      // Navigate to the new room
+      // navigate to the new room
       navigate(`/chat/${newRoom.id}`);
       onClose();
     } catch (err: any) {
@@ -117,7 +117,7 @@ const CreateChatModal: React.FC<CreateChatModalProps> = ({ isOpen, onClose }) =>
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        {/* Header */}
+        {/* header */}
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-gray-900">Create New Chat</h2>
@@ -142,9 +142,9 @@ const CreateChatModal: React.FC<CreateChatModalProps> = ({ isOpen, onClose }) =>
           </div>
         </div>
 
-        {/* Content */}
+        {/* content */}
         <div className="flex-1 overflow-y-auto px-6 py-4">
-          {/* Room Type Selection */}
+          {/* room type selection */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Chat Type
@@ -181,7 +181,7 @@ const CreateChatModal: React.FC<CreateChatModalProps> = ({ isOpen, onClose }) =>
             </div>
           </div>
 
-          {/* Group Name Input */}
+          {/* group name input */}
           {roomType === 'group' && (
             <div className="mb-6">
               <label
@@ -201,7 +201,7 @@ const CreateChatModal: React.FC<CreateChatModalProps> = ({ isOpen, onClose }) =>
             </div>
           )}
 
-          {/* User Search */}
+          {/* user search */}
           <div className="mb-4">
             <label
               htmlFor="userSearch"
@@ -219,7 +219,7 @@ const CreateChatModal: React.FC<CreateChatModalProps> = ({ isOpen, onClose }) =>
             />
           </div>
 
-          {/* User List */}
+          {/* user list */}
           <div className="border border-gray-200 rounded-lg max-h-64 overflow-y-auto">
             {isLoadingUsers ? (
               <div className="flex justify-center items-center py-8">
@@ -261,7 +261,7 @@ const CreateChatModal: React.FC<CreateChatModalProps> = ({ isOpen, onClose }) =>
             )}
           </div>
 
-          {/* Selected Count */}
+          {/* selected count */}
           {selectedUserIds.length > 0 && (
             <div className="mt-3 text-sm text-gray-600">
               {selectedUserIds.length} user{selectedUserIds.length !== 1 ? 's' : ''}{' '}
@@ -269,7 +269,7 @@ const CreateChatModal: React.FC<CreateChatModalProps> = ({ isOpen, onClose }) =>
             </div>
           )}
 
-          {/* Error Message */}
+          {/* error message */}
           {error && (
             <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-sm text-red-800">{error}</p>
@@ -277,7 +277,7 @@ const CreateChatModal: React.FC<CreateChatModalProps> = ({ isOpen, onClose }) =>
           )}
         </div>
 
-        {/* Footer */}
+        {/* footer */}
         <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
           <button
             onClick={onClose}

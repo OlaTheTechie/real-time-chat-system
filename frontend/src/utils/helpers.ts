@@ -14,7 +14,7 @@ export const formatTimestamp = (timestamp: string): string => {
       hour12: true,
     });
   } else if (diffInHours < 168) {
-    // Less than a week
+    // less than a week
     return date.toLocaleDateString('en-US', { weekday: 'short' });
   } else {
     return date.toLocaleDateString('en-US', {

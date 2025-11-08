@@ -41,13 +41,13 @@ def seed_test_data(db: Session) -> None:
     Seed database with test data for development
     """
     try:
-        # Check if data already exists
+        # check if data already exists
         existing_user = db.query(User).first()
         if existing_user:
             logger.info("Database already contains data, skipping seed")
             return
         
-        # Create test users
+        # create test users
         user1 = User(
             email="alice@example.com",
             username="alice",
@@ -79,7 +79,7 @@ if __name__ == "__main__":
     logger.info("Initializing database...")
     init_db()
     
-    # Optionally seed test data
+    # optionally seed test data
     db = SessionLocal()
     try:
         seed_test_data(db)

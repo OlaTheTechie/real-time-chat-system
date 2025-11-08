@@ -33,7 +33,7 @@ const ChatRoomList: React.FC = () => {
     if (room.room_type === 'group') {
       return room.name || 'Unnamed Group';
     } else {
-      // For one-to-one, show the other user's name
+      // for one-to-one, show the other user's name
       const otherMember = room.members.find((member) => member.id !== user?.id);
       return otherMember?.username || 'Unknown User';
     }
@@ -45,14 +45,14 @@ const ChatRoomList: React.FC = () => {
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
-      {/* Navbar */}
+      {/* navbar */}
       <Navbar title="Chat Rooms" />
 
-      {/* Main Content - Two Column Layout */}
+      {/* main content - two column layout */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar - Chat List */}
+        {/* sidebar - chat list */}
         <div className="w-full md:w-96 bg-white border-r border-gray-200 flex flex-col">
-          {/* Header with Create Button */}
+          {/* header with create button */}
           <div className="p-4 border-b border-gray-200 bg-white flex-shrink-0">
             <button
               onClick={() => setShowCreateModal(true)}
@@ -62,7 +62,7 @@ const ChatRoomList: React.FC = () => {
             </button>
           </div>
 
-          {/* Error Message */}
+          {/* error message */}
           {error && (
             <div className="m-4">
               <ErrorMessage
@@ -73,14 +73,14 @@ const ChatRoomList: React.FC = () => {
             </div>
           )}
 
-          {/* Chat List Container */}
+          {/* chat list container */}
           <div className="flex-1 overflow-y-auto">
-            {/* Loading State */}
+            {/* loading state */}
             {isLoading && rooms.length === 0 && (
               <SkeletonLoader type="chat-room" count={5} />
             )}
 
-            {/* Empty State */}
+            {/* empty state */}
             {!isLoading && rooms.length === 0 && (
               <div className="flex flex-col items-center justify-center h-full p-8 text-center">
                 <svg
@@ -105,7 +105,7 @@ const ChatRoomList: React.FC = () => {
               </div>
             )}
 
-            {/* Chat Rooms List */}
+            {/* chat rooms list */}
             {!isLoading && rooms.length > 0 && (
               <div className="divide-y divide-gray-100">
                 {rooms.map((room) => (
@@ -186,7 +186,7 @@ const ChatRoomList: React.FC = () => {
           </div>
         </div>
 
-        {/* Main Content Area - Placeholder */}
+        {/* main content area - placeholder */}
         <div className="hidden md:flex flex-1 items-center justify-center bg-gray-50">
           <div className="text-center text-gray-400">
             <svg
@@ -207,7 +207,7 @@ const ChatRoomList: React.FC = () => {
         </div>
       </div>
 
-      {/* Create Chat Modal */}
+      {/* create chat modal */}
       <CreateChatModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}

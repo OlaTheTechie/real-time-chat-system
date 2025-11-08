@@ -28,14 +28,14 @@ const Register: React.FC = () => {
   const validateForm = (): boolean => {
     const newErrors: typeof errors = {};
     
-    // Email validation
+    // email validation
     if (!formData.email) {
       newErrors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
     
-    // Username validation
+    // username validation
     if (!formData.username) {
       newErrors.username = 'Username is required';
     } else if (formData.username.length < 3) {
@@ -44,14 +44,14 @@ const Register: React.FC = () => {
       newErrors.username = 'Username must be less than 50 characters';
     }
     
-    // Password validation
+    // password validation
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters long';
     }
     
-    // Confirm password validation
+    // confirm password validation
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = 'Please confirm your password';
     } else if (formData.password !== formData.confirmPassword) {
@@ -65,10 +65,10 @@ const Register: React.FC = () => {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    // Clear previous errors
+    // clear previous errors
     setErrors({});
     
-    // Validate form
+    // validate form
     if (!validateForm()) {
       return;
     }
@@ -82,14 +82,25 @@ const Register: React.FC = () => {
         password: formData.password,
       });
       
-      // Redirect to login page on successful registration
+      // redirect to login page on successful registration
       navigate('/login', {
         state: { message: 'Registration successful! Please log in.' },
       });
     } catch (error) {
       const axiosError = error as AxiosError<ApiError>;
+      const detail = axiosError.response?.data?.detail;
+      
+      // handle validation errors (array) or string errors
+      let errorMessage = 'Registration failed. Please try again.';
+      if (typeof detail === 'string') {
+        errorMessage = detail;
+      } else if (Array.isArray(detail)) {
+        // format validation errors
+        errorMessage = detail.map(err => err.msg).join(', ');
+      }
+      
       setErrors({
-        general: axiosError.response?.data?.detail || 'Registration failed. Please try again.',
+        general: errorMessage,
       });
     } finally {
       setIsSubmitting(false);
@@ -103,7 +114,7 @@ const Register: React.FC = () => {
       [name]: value,
     }));
     
-    // Clear error for this field when user starts typing
+    // clear error for this field when user starts typing
     if (errors[name as keyof typeof errors]) {
       setErrors((prev) => ({
         ...prev,

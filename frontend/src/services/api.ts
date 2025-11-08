@@ -13,7 +13,7 @@ import {
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
 
-// Create axios instance
+// create axios instance
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -21,7 +21,7 @@ export const apiClient = axios.create({
   },
 });
 
-// Flag to prevent multiple refresh attempts
+// flag to prevent multiple refresh attempts
 let isRefreshing = false;
 let failedQueue: Array<{
   resolve: (value?: unknown) => void;
@@ -39,7 +39,7 @@ const processQueue = (error: Error | null, token: string | null = null) => {
   failedQueue = [];
 };
 
-// Request interceptor to inject JWT token
+// request interceptor to inject jwt token
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem('access_token');
@@ -53,7 +53,7 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Response interceptor for automatic token refresh on 401
+// response interceptor for automatic token refresh on 401
 apiClient.interceptors.response.use(
   (response) => {
     return response;
@@ -63,10 +63,10 @@ apiClient.interceptors.response.use(
       _retry?: boolean;
     };
 
-    // If error is 401 and we haven't retried yet
+    // if error is 401 and we haven't retried yet
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
-        // If already refreshing, queue this request
+        // if already refreshing, queue this request
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
@@ -87,7 +87,7 @@ apiClient.interceptors.response.use(
       const refreshToken = localStorage.getItem('refresh_token');
 
       if (!refreshToken) {
-        // No refresh token, redirect to login
+        // no refresh token, redirect to login
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         window.location.href = '/login';
@@ -95,7 +95,7 @@ apiClient.interceptors.response.use(
       }
 
       try {
-        // Attempt to refresh the token
+        // attempt to refresh the token
         const response = await axios.post<AuthResponse>(
           `${API_BASE_URL}/api/v1/auth/refresh`,
           { refresh_token: refreshToken }
@@ -103,13 +103,13 @@ apiClient.interceptors.response.use(
 
         const { access_token, refresh_token: newRefreshToken } = response.data;
 
-        // Store new tokens
+        // store new tokens
         localStorage.setItem('access_token', access_token);
         if (newRefreshToken) {
           localStorage.setItem('refresh_token', newRefreshToken);
         }
 
-        // Update authorization header
+        // update authorization header
         if (originalRequest.headers) {
           originalRequest.headers.Authorization = `Bearer ${access_token}`;
         }
@@ -117,13 +117,13 @@ apiClient.interceptors.response.use(
         processQueue(null, access_token);
         isRefreshing = false;
 
-        // Retry original request
+        // retry original request
         return apiClient(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError as Error, null);
         isRefreshing = false;
 
-        // Refresh failed, clear tokens and redirect to login
+        // refresh failed, clear tokens and redirect to login
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         window.location.href = '/login';
@@ -136,7 +136,7 @@ apiClient.interceptors.response.use(
   }
 );
 
-// Authentication API functions
+// authentication api functions
 export const authApi = {
   register: async (data: RegisterData): Promise<User> => {
     const response = await apiClient.post<User>('/api/v1/auth/register', data);
@@ -186,7 +186,7 @@ export const authApi = {
   },
 };
 
-// Chat API functions
+// chat api functions
 export const chatApi = {
   getChatRooms: async (): Promise<ChatRoom[]> => {
     const response = await apiClient.get<ChatRoom[]>('/api/v1/chat/rooms');

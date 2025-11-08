@@ -1,15 +1,15 @@
 import { Message } from '../types';
 
-// WebSocket message types
+// websocket message types
 export interface WebSocketMessage {
   type: 'message' | 'typing' | 'user_joined' | 'user_left' | 'error';
   data: Message | any;
 }
 
-// Connection status
+// connection status
 export type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'error';
 
-// Event callback types
+// event callback types
 type MessageCallback = (message: Message) => void;
 type StatusCallback = (status: ConnectionStatus) => void;
 type ErrorCallback = (error: Error) => void;
@@ -20,19 +20,19 @@ export class WebSocketService {
   private token: string | null = null;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
-  private reconnectDelay = 1000; // Start with 1 second
+  private reconnectDelay = 1000; // start with 1 second
   private reconnectTimer: NodeJS.Timeout | null = null;
   private messageQueue: string[] = [];
   private isIntentionalClose = false;
 
-  // Event listeners
+  // event listeners
   private messageListeners: MessageCallback[] = [];
   private connectListeners: StatusCallback[] = [];
   private disconnectListeners: StatusCallback[] = [];
   private errorListeners: ErrorCallback[] = [];
 
   constructor() {
-    // Bind methods to ensure correct 'this' context
+    // bind methods to ensure correct 'this' context
     this.handleOpen = this.handleOpen.bind(this);
     this.handleMessage = this.handleMessage.bind(this);
     this.handleError = this.handleError.bind(this);
@@ -43,12 +43,12 @@ export class WebSocketService {
    * Connect to a chat room WebSocket
    */
   connect(roomId: number, token: string): void {
-    // If already connected to the same room, don't reconnect
+    // if already connected to the same room, don't reconnect
     if (this.ws && this.roomId === roomId && this.ws.readyState === WebSocket.OPEN) {
       return;
     }
 
-    // Close existing connection if any
+    // close existing connection if any
     if (this.ws) {
       this.disconnect();
     }
@@ -97,7 +97,7 @@ export class WebSocketService {
     this.reconnectDelay = 1000;
     this.notifyStatusChange('connected');
 
-    // Send queued messages
+    // send queued messages
     this.flushMessageQueue();
   }
 
@@ -105,18 +105,23 @@ export class WebSocketService {
    * Handle incoming WebSocket messages
    */
   private handleMessage(event: MessageEvent): void {
+    console.log('[WebSocket] Raw message received:', event.data);
     try {
       const data = JSON.parse(event.data);
+      console.log('[WebSocket] Parsed message:', data);
 
-      // Handle different message types
+      // handle different message types
       if (data.type === 'message' && data.data) {
         const message: Message = data.data;
+        console.log('[WebSocket] Notifying message listeners with:', message);
         this.notifyMessage(message);
       } else if (data.type === 'error') {
         console.error('WebSocket error message:', data.data);
         this.notifyError(new Error(data.data.message || 'WebSocket error'));
+      } else {
+        console.log('[WebSocket] Unhandled message type:', data.type);
       }
-      // Handle other message types (typing, user_joined, user_left) if needed
+      // handle other message types (typing, user_joined, user_left) if needed
     } catch (error) {
       console.error('Failed to parse WebSocket message:', error);
     }
@@ -138,7 +143,7 @@ export class WebSocketService {
     console.log(`WebSocket closed: ${event.code} - ${event.reason}`);
     this.notifyStatusChange('disconnected');
 
-    // Attempt reconnection if not intentionally closed
+    // attempt reconnection if not intentionally closed
     if (!this.isIntentionalClose && this.reconnectAttempts < this.maxReconnectAttempts) {
       this.attemptReconnect();
     }
@@ -212,11 +217,11 @@ export class WebSocketService {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(message);
     } else {
-      // Queue message if not connected
+      // queue message if not connected
       console.log('WebSocket not connected, queuing message');
       this.messageQueue.push(message);
 
-      // Attempt to reconnect if disconnected
+      // attempt to reconnect if disconnected
       if (!this.ws || this.ws.readyState === WebSocket.CLOSED) {
         this.attemptReconnect();
       }
@@ -241,7 +246,7 @@ export class WebSocketService {
    */
   onMessage(callback: MessageCallback): () => void {
     this.messageListeners.push(callback);
-    // Return unsubscribe function
+    // return unsubscribe function
     return () => {
       this.messageListeners = this.messageListeners.filter((cb) => cb !== callback);
     };
@@ -350,5 +355,5 @@ export class WebSocketService {
   }
 }
 
-// Export singleton instance
+// export singleton instance
 export const websocketService = new WebSocketService();

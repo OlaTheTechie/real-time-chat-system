@@ -14,7 +14,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, disabled = f
   const handleSend = async () => {
     const trimmedMessage = message.trim();
     
-    // Prevent sending empty messages
+    // prevent sending empty messages
     if (!trimmedMessage || isSending || disabled) {
       return;
     }
@@ -22,18 +22,18 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, disabled = f
     setIsSending(true);
     try {
       await onSendMessage(trimmedMessage);
-      // Clear input after successful send
+      // clear input after successful send
       setMessage('');
     } catch (error) {
       console.error('Failed to send message:', error);
-      // Keep the message in the input on error
+      // keep the message in the input on error
     } finally {
       setIsSending(false);
     }
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    // Enter key to send (Shift+Enter for new line)
+    // enter key to send (shift+enter for new line)
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -42,7 +42,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, disabled = f
 
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
-    // Enforce character limit
+    // enforce character limit
     if (value.length <= MAX_LENGTH) {
       setMessage(value);
     }
@@ -54,7 +54,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, disabled = f
   return (
     <div className="border-t border-gray-200 bg-white p-4 shadow-lg">
       <div className="flex items-end gap-3">
-        {/* Text input field */}
+        {/* text input field */}
         <div className="flex-1">
           <textarea
             value={message}
@@ -71,7 +71,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, disabled = f
             }}
           />
           
-          {/* Character limit indicator */}
+          {/* character limit indicator */}
           {showCharLimit && (
             <div
               className={`text-xs mt-1.5 px-1 ${
@@ -83,7 +83,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, disabled = f
           )}
         </div>
 
-        {/* Send button */}
+        {/* send button */}
         <button
           onClick={handleSend}
           disabled={!message.trim() || disabled || isSending}

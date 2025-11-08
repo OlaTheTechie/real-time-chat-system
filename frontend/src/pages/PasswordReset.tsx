@@ -9,7 +9,7 @@ const PasswordReset: React.FC = () => {
   const [searchParams] = useSearchParams();
   const tokenFromUrl = searchParams.get('token');
   
-  // Determine if we're in request or confirm mode
+  // determine if we're in request or confirm mode
   const isConfirmMode = !!tokenFromUrl;
   
   const [formData, setFormData] = useState({
@@ -33,7 +33,7 @@ const PasswordReset: React.FC = () => {
   const validateRequestForm = (): boolean => {
     const newErrors: typeof errors = {};
     
-    // Email validation
+    // email validation
     if (!formData.email) {
       newErrors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
@@ -47,19 +47,19 @@ const PasswordReset: React.FC = () => {
   const validateConfirmForm = (): boolean => {
     const newErrors: typeof errors = {};
     
-    // Token validation
+    // token validation
     if (!formData.token) {
       newErrors.token = 'Reset token is required';
     }
     
-    // New password validation
+    // new password validation
     if (!formData.newPassword) {
       newErrors.newPassword = 'New password is required';
     } else if (formData.newPassword.length < 6) {
       newErrors.newPassword = 'Password must be at least 6 characters long';
     }
     
-    // Confirm password validation
+    // confirm password validation
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = 'Please confirm your password';
     } else if (formData.newPassword !== formData.confirmPassword) {
@@ -73,11 +73,11 @@ const PasswordReset: React.FC = () => {
   const handleRequestSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    // Clear previous errors and success message
+    // clear previous errors and success message
     setErrors({});
     setSuccessMessage('');
     
-    // Validate form
+    // validate form
     if (!validateRequestForm()) {
       return;
     }
@@ -90,14 +90,22 @@ const PasswordReset: React.FC = () => {
         response.message || 'Password reset instructions have been sent to your email.'
       );
       
-      // Clear the email field
+      // clear the email field
       setFormData((prev) => ({ ...prev, email: '' }));
     } catch (error) {
       const axiosError = error as AxiosError<ApiError>;
+      const detail = axiosError.response?.data?.detail;
+      
+      // handle validation errors (array) or string errors
+      let errorMessage = 'Failed to send reset email. Please try again.';
+      if (typeof detail === 'string') {
+        errorMessage = detail;
+      } else if (Array.isArray(detail)) {
+        errorMessage = detail.map(err => err.msg).join(', ');
+      }
+      
       setErrors({
-        general:
-          axiosError.response?.data?.detail ||
-          'Failed to send reset email. Please try again.',
+        general: errorMessage,
       });
     } finally {
       setIsSubmitting(false);
@@ -107,11 +115,11 @@ const PasswordReset: React.FC = () => {
   const handleConfirmSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    // Clear previous errors and success message
+    // clear previous errors and success message
     setErrors({});
     setSuccessMessage('');
     
-    // Validate form
+    // validate form
     if (!validateConfirmForm()) {
       return;
     }
@@ -127,7 +135,7 @@ const PasswordReset: React.FC = () => {
         response.message || 'Password reset successful! Redirecting to login...'
       );
       
-      // Redirect to login after 2 seconds
+      // redirect to login after 2 seconds
       setTimeout(() => {
         navigate('/login', {
           state: { message: 'Password reset successful! Please log in with your new password.' },
@@ -135,10 +143,18 @@ const PasswordReset: React.FC = () => {
       }, 2000);
     } catch (error) {
       const axiosError = error as AxiosError<ApiError>;
+      const detail = axiosError.response?.data?.detail;
+      
+      // handle validation errors (array) or string errors
+      let errorMessage = 'Failed to reset password. The token may be invalid or expired.';
+      if (typeof detail === 'string') {
+        errorMessage = detail;
+      } else if (Array.isArray(detail)) {
+        errorMessage = detail.map(err => err.msg).join(', ');
+      }
+      
       setErrors({
-        general:
-          axiosError.response?.data?.detail ||
-          'Failed to reset password. The token may be invalid or expired.',
+        general: errorMessage,
       });
     } finally {
       setIsSubmitting(false);
@@ -152,7 +168,7 @@ const PasswordReset: React.FC = () => {
       [name]: value,
     }));
     
-    // Clear error for this field when user starts typing
+    // clear error for this field when user starts typing
     if (errors[name as keyof typeof errors]) {
       setErrors((prev) => ({
         ...prev,

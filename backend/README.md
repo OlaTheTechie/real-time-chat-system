@@ -1,6 +1,17 @@
 # Realtime Chat Server
 
-A FastAPI-based realtime chat server with WebSocket support, PostgreSQL database, and Redis for message broadcasting.
+A FastAPI-based realtime chat server with WebSocket support, class-based views, admin panel, PostgreSQL database, and Redis for message broadcasting.
+
+## Key Features
+
+✅ **Class-Based Views**: All endpoints use class-based architecture for better organization and maintainability
+✅ **Admin Panel**: Web-based interface at `/admin` for managing all models
+✅ **Authentication**: Complete auth system (register, login, logout, password reset, session management)
+✅ **Real-time Chat**: WebSocket support for instant messaging
+✅ **One-to-One & Group Chat**: Support for both chat types
+✅ **Message History**: Persistent storage with pagination
+✅ **REST API**: Full REST API with automatic documentation
+✅ **Time/Space Complexity**: All methods documented with complexity analysis
 
 ## Setup Instructions
 
@@ -34,18 +45,21 @@ Or using uvicorn directly:
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### API Documentation
+### Access Points
 
-Once the server is running, visit:
-- API Documentation: http://localhost:8000/docs
-- Alternative docs: http://localhost:8000/redoc
+Once the server is running:
+- **API Documentation**: http://localhost:8000/docs
+- **Alternative docs**: http://localhost:8000/redoc
+- **Admin Panel**: http://localhost:8000/admin
+- **Health Check**: http://localhost:8000/health
 
-### Frontend (Streamlit)
+### Frontend (React)
 
-To run the Streamlit frontend:
+To run the React frontend:
 ```bash
 cd frontend
-streamlit run main.py
+npm install
+npm start
 ```
 
 ## Project Structure
@@ -53,14 +67,41 @@ streamlit run main.py
 ```
 backend/
 ├── app/
-│   ├── api/v1/          # API routes
-│   ├── auth/            # Authentication module
-│   ├── chat/            # Chat functionality
+│   ├── admin/           # Admin panel configuration
+│   ├── api/v1/          # API routes and admin views
+│   ├── auth/            # Authentication (views + routes)
+│   ├── chat/            # Chat functionality (views + routes)
 │   ├── core/            # Core configuration and security
 │   ├── database/        # Database and Redis connections
 │   ├── models/          # SQLAlchemy models
 │   └── main.py          # FastAPI application
+├── docs/                # Documentation
+│   ├── CLASS_BASED_VIEWS.md
+│   ├── ADMIN_PANEL.md
+│   └── API_TESTING_SUMMARY.md
 ├── alembic/             # Database migrations
-├── frontend/            # Streamlit frontend
 └── requirements.txt     # Python dependencies
 ```
+
+## Architecture
+
+### Class-Based Views
+
+All API endpoints use class-based views for better organization:
+
+- **AuthViews**: Authentication operations
+- **ChatRoomViews**: Chat room management
+- **MessageViews**: Message operations
+- **AdminViews**: Admin operations
+
+See [CLASS_BASED_VIEWS.md](docs/CLASS_BASED_VIEWS.md) for details.
+
+### Admin Panel
+
+Web-based admin interface for managing:
+- Users
+- Chat Rooms
+- Messages
+- Password Reset Tokens
+
+See [ADMIN_PANEL.md](docs/ADMIN_PANEL.md) for details.

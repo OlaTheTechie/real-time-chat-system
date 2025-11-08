@@ -61,11 +61,32 @@ class ConnectionManager:
     
     async def broadcast_to_room(self, room_id: int, message: dict):
         """
-        Broadcast message to all connections in a room via Redis pub/sub
+        Broadcast message to all connections in a room
+        For single-server: direct broadcast to websockets
+        For multi-server: use Redis pub/sub
         """
-        channel = f"chat_room_{room_id}"
         message_json = json.dumps(message)
-        self.redis.publish(channel, message_json)
+        
+        # direct broadcast to all websockets in this room (single-server)
+        if room_id in self.active_connections:
+            disconnected = set()
+            for websocket in self.active_connections[room_id]:
+                try:
+                    await websocket.send_text(message_json)
+                except Exception as e:
+                    print(f"Error sending to websocket: {e}")
+                    disconnected.add(websocket)
+            
+            # clean up disconnected websockets
+            for ws in disconnected:
+                await self.disconnect(ws, room_id)
+        
+        # also publish to redis for multi-server support (optional)
+        try:
+            channel = f"chat_room_{room_id}"
+            self.redis.publish(channel, message_json)
+        except Exception as e:
+            print(f"Redis publish error (non-critical): {e}")
     
     async def send_personal_message(self, message: str, websocket: WebSocket):
         """

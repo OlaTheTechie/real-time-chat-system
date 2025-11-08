@@ -5,6 +5,7 @@ from app.api.v1.api import api_router
 from app.chat.ws_routes import router as ws_router
 from app.database.database import engine
 from app.models import Base
+from app.admin import setup_admin
 
 # create database tables
 Base.metadata.create_all(bind=engine)
@@ -24,6 +25,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# setup admin panel (accessible at /admin)
+admin = setup_admin(app, engine)
 
 # include api router
 app.include_router(api_router, prefix=settings.API_V1_STR)

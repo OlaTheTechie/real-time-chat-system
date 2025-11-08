@@ -12,7 +12,7 @@ class PasswordResetToken(Base):
     token = Column(String, unique=True, index=True, nullable=False)
     expires_at = Column(DateTime, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
-    used = Column(String, default=False)  # Changed to String to avoid boolean issues with SQLite
+    used = Column(String, default=False)  # changed to string to avoid boolean issues with sqlite
     
     # relationships
     user = relationship("User", back_populates="password_reset_tokens")

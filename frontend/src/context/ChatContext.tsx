@@ -34,12 +34,12 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   const [error, setError] = useState<string | null>(null);
   const [hasMoreMessages, setHasMoreMessages] = useState(false);
 
-  // Load rooms when user is authenticated
+  // load rooms when user is authenticated
   useEffect(() => {
     if (isAuthenticated) {
       loadRooms();
     } else {
-      // Clear state when user logs out
+      // clear state when user logs out
       setRooms([]);
       setCurrentRoom(null);
       setMessages([]);
@@ -65,18 +65,18 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     setIsLoading(true);
     setError(null);
     try {
-      // Fetch room details
+      // fetch room details
       const roomDetails = await chatApi.getRoomDetails(roomId);
       setCurrentRoom(roomDetails);
 
-      // Clear unread count for this room
+      // clear unread count for this room
       setRooms((prevRooms) =>
         prevRooms.map((room) =>
           room.id === roomId ? { ...room, unread_count: 0 } : room
         )
       );
 
-      // Load messages for the room
+      // load messages for the room
       await loadMessages(roomId);
     } catch (err: any) {
       const errorMessage = err.response?.data?.detail || 'Failed to load room details';
@@ -94,7 +94,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
       try {
         const newRoom = await chatApi.createChatRoom(roomData);
         
-        // Add new room to the list
+        // add new room to the list
         setRooms((prevRooms) => [newRoom, ...prevRooms]);
         
         return newRoom;
@@ -116,14 +116,14 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
       const response = await chatApi.getMessages(roomId, page);
       
       if (page === 1) {
-        // First page, replace messages
+        // first page, replace messages
         setMessages(response.messages);
       } else {
-        // Subsequent pages, prepend older messages
+        // subsequent pages, prepend older messages
         setMessages((prevMessages) => [...response.messages, ...prevMessages]);
       }
       
-      // Update hasMore flag from API response
+      // update hasmore flag from api response
       setHasMoreMessages(response.has_more);
     } catch (err: any) {
       const errorMessage = err.response?.data?.detail || 'Failed to load messages';
@@ -143,10 +143,10 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
       try {
         const newMessage = await chatApi.sendMessage(currentRoom.id, content);
         
-        // Add message to the list
+        // add message to the list
         setMessages((prevMessages) => [...prevMessages, newMessage]);
 
-        // Update last message in rooms list
+        // update last message in rooms list
         setRooms((prevRooms) =>
           prevRooms.map((room) =>
             room.id === currentRoom.id
@@ -165,20 +165,23 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   );
 
   const addMessage = useCallback((message: Message) => {
-    // Check if message already exists to avoid duplicates
+    console.log('[ChatContext] addMessage called with:', message);
+    // check if message already exists to avoid duplicates
     setMessages((prevMessages) => {
       const exists = prevMessages.some((m) => m.id === message.id);
+      console.log('[ChatContext] Message exists?', exists, 'Current messages:', prevMessages.length);
       if (exists) {
         return prevMessages;
       }
+      console.log('[ChatContext] Adding new message to state');
       return [...prevMessages, message];
     });
 
-    // Update last message in rooms list and sort by latest activity
+    // update last message in rooms list and sort by latest activity
     setRooms((prevRooms) => {
       const updatedRooms = prevRooms.map((room) => {
         if (room.id === message.room_id) {
-          // Increment unread count if message is from another user and not in current room
+          // increment unread count if message is from another user and not in current room
           const isCurrentRoom = currentRoom?.id === room.id;
           const isOwnMessage = message.sender_id === user?.id;
           const shouldIncrementUnread = !isCurrentRoom && !isOwnMessage;
@@ -194,7 +197,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         return room;
       });
 
-      // Sort rooms by last message timestamp (most recent first)
+      // sort rooms by last message timestamp (most recent first)
       return updatedRooms.sort((a, b) => {
         const aTime = a.last_message?.timestamp || a.created_at;
         const bTime = b.last_message?.timestamp || b.created_at;

@@ -1,4 +1,4 @@
-// User type definition
+// user type definition
 export interface User {
   id: number;
   email: string;
@@ -8,27 +8,27 @@ export interface User {
   created_at: string;
 }
 
-// Token type definition
+// token type definition
 export interface Token {
   access_token: string;
   refresh_token: string;
   token_type: string;
 }
 
-// Registration data
+// registration data
 export interface RegisterData {
   email: string;
   username: string;
   password: string;
 }
 
-// Login data
+// login data
 export interface LoginData {
   email: string;
   password: string;
 }
 
-// Auth response (combines token and user)
+// auth response (combines token and user)
 export interface AuthResponse {
   access_token: string;
   refresh_token: string;
@@ -36,14 +36,22 @@ export interface AuthResponse {
   user?: User;
 }
 
-// API error response
+// api error response
 export interface ApiError {
-  detail: string;
+  detail?: string | ValidationError[];
 }
 
-// Chat-related types
+// validation error from fastapi
+export interface ValidationError {
+  type: string;
+  loc: (string | number)[];
+  msg: string;
+  input?: any;
+}
 
-// Message type definition
+// chat-related types
+
+// message type definition
 export interface Message {
   id: number;
   room_id: number;
@@ -55,7 +63,7 @@ export interface Message {
   sender_username?: string;
 }
 
-// Chat room member
+// chat room member
 export interface ChatRoomMember {
   id: number;
   email: string;
@@ -66,7 +74,7 @@ export interface ChatRoomMember {
   role?: string;
 }
 
-// Chat room type definition
+// chat room type definition
 export interface ChatRoom {
   id: number;
   name: string | null;
@@ -78,14 +86,14 @@ export interface ChatRoom {
   unread_count?: number;
 }
 
-// Create room data
+// create room data
 export interface CreateRoomData {
   name?: string;
   room_type: 'one_to_one' | 'group';
   member_ids: number[];
 }
 
-// Message list response with pagination
+// message list response with pagination
 export interface MessageListResponse {
   messages: Message[];
   total: number;

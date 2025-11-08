@@ -99,26 +99,36 @@ async def websocket_chat_endpoint(
                 
                 if message_type == "message" and content:
                     # save message to database
-                    db_message = save_message_to_db(
+                    db_message = await save_message_to_db(
                         db=db,
                         room_id=room_id,
                         sender_id=user.id,
                         content=content
                     )
                     
+                    print(f"[WebSocket] Message saved to DB: id={db_message.id}, room={room_id}, sender={user.username}")
+                    
                     # prepare broadcast message
                     broadcast_data = {
                         "type": "message",
-                        "id": db_message.id,
-                        "room_id": room_id,
-                        "sender_id": user.id,
-                        "sender_username": user.username,
-                        "content": content,
-                        "timestamp": db_message.timestamp.isoformat()
+                        "data": {
+                            "id": db_message.id,
+                            "room_id": room_id,
+                            "sender_id": user.id,
+                            "sender_username": user.username,
+                            "content": content,
+                            "timestamp": db_message.timestamp.isoformat(),
+                            "is_edited": False,
+                            "message_type": "text"
+                        }
                     }
+                    
+                    print(f"[WebSocket] Broadcasting message to room {room_id}: {broadcast_data}")
                     
                     # broadcast to all room members
                     await manager.broadcast_to_room(room_id, broadcast_data)
+                    
+                    print(f"[WebSocket] Broadcast complete")
                 
             except json.JSONDecodeError:
                 # send error message

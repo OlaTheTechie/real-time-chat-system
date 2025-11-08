@@ -7,7 +7,7 @@ interface MessageBubbleProps {
 }
 
 const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwnMessage }) => {
-  // Format timestamp to readable format
+  // format timestamp to readable format
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
     const now = new Date();
@@ -31,14 +31,14 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwnMessage }) 
   return (
     <div className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} group animate-fade-in`}>
       <div className={`max-w-xs lg:max-w-md xl:max-w-lg ${isOwnMessage ? 'order-2' : 'order-1'}`}>
-        {/* Sender username (only show for other users' messages) */}
+        {/* sender username (only show for other users' messages) */}
         {!isOwnMessage && message.sender_username && (
           <div className="text-xs font-medium text-gray-600 mb-1 px-2">
             {message.sender_username}
           </div>
         )}
         
-        {/* Message bubble */}
+        {/* message bubble */}
         <div
           className={`rounded-2xl px-4 py-2.5 break-words shadow-sm transition-all duration-200 group-hover:shadow-md ${
             isOwnMessage
@@ -48,7 +48,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwnMessage }) 
         >
           <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
           
-          {/* Message metadata */}
+          {/* message metadata */}
           <div
             className={`flex items-center gap-2 mt-1.5 text-xs ${
               isOwnMessage ? 'text-indigo-100' : 'text-gray-500'

@@ -22,15 +22,15 @@ class PasswordResetService:
     
     def create_reset_token(self, email: str) -> Optional[str]:
         """Create a password reset token for the given email"""
-        # Find user by email
+        # find user by email
         user = self.db.query(User).filter(User.email == email).first()
         if not user:
             return None
         
-        # Generate token
+        # generate token
         token = self.generate_reset_token()
         
-        # Store in database
+        # store in database
         reset_token = PasswordResetToken.create_token(
             user_id=user.id,
             token=token,
@@ -38,7 +38,7 @@ class PasswordResetService:
         )
         self.db.add(reset_token)
         
-        # Also store in Redis for faster lookup (optional but recommended)
+        # also store in redis for faster lookup (optional but recommended)
         redis_key = f"password_reset:{token}"
         redis_value = f"{user.id}:{user.email}"
         self.redis_client.setex(
@@ -52,7 +52,7 @@ class PasswordResetService:
     
     def verify_reset_token(self, token: str) -> Optional[User]:
         """Verify a password reset token and return the associated user"""
-        # First check Redis for faster lookup
+        # first check redis for faster lookup
         redis_key = f"password_reset:{token}"
         redis_value = self.redis_client.get(redis_key)
         
@@ -60,7 +60,7 @@ class PasswordResetService:
             user_id = int(redis_value.decode().split(':')[0])
             user = self.db.query(User).filter(User.id == user_id).first()
             
-            # Also verify in database
+            # also verify in database
             db_token = self.db.query(PasswordResetToken).filter(
                 PasswordResetToken.token == token,
                 PasswordResetToken.user_id == user_id
@@ -69,7 +69,7 @@ class PasswordResetService:
             if db_token and not db_token.is_expired() and not db_token.is_used():
                 return user
         
-        # Fallback to database-only lookup
+        # fallback to database-only lookup
         db_token = self.db.query(PasswordResetToken).filter(
             PasswordResetToken.token == token
         ).first()
@@ -85,10 +85,10 @@ class PasswordResetService:
         if not user:
             return False
         
-        # Update user password
+        # update user password
         user.hashed_password = get_password_hash(new_password)
         
-        # Mark token as used in database
+        # mark token as used in database
         db_token = self.db.query(PasswordResetToken).filter(
             PasswordResetToken.token == token,
             PasswordResetToken.user_id == user.id
@@ -97,7 +97,7 @@ class PasswordResetService:
         if db_token:
             db_token.mark_as_used()
         
-        # Remove from Redis
+        # remove from redis
         redis_key = f"password_reset:{token}"
         self.redis_client.delete(redis_key)
         
@@ -111,11 +111,11 @@ class PasswordResetService:
         ).all()
         
         for token in expired_tokens:
-            # Remove from Redis if exists
+            # remove from redis if exists
             redis_key = f"password_reset:{token.token}"
             self.redis_client.delete(redis_key)
             
-            # Remove from database
+            # remove from database
             self.db.delete(token)
         
         self.db.commit()

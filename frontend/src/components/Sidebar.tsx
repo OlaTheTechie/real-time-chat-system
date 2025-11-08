@@ -26,7 +26,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateChat, currentRoomId }) => {
     if (room.room_type === 'group') {
       return room.name || 'Unnamed Group';
     } else {
-      // For one-to-one, show the other user's name
+      // for one-to-one, show the other user's name
       const otherMember = room.members.find((member) => member.id !== user?.id);
       return otherMember?.username || 'Unknown User';
     }
@@ -36,7 +36,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateChat, currentRoomId }) => {
     return room.members.filter((member) => member.is_online).length;
   };
 
-  // Filter rooms based on search query
+  // filter rooms based on search query
   const filteredRooms = rooms.filter((room) => {
     const displayName = getRoomDisplayName(room).toLowerCase();
     const query = searchQuery.toLowerCase();
@@ -45,7 +45,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateChat, currentRoomId }) => {
 
   return (
     <div className="w-80 bg-white border-r border-gray-200 flex flex-col h-full shadow-sm">
-      {/* Search and Create Button */}
+      {/* search and create button */}
       <div className="p-4 border-b border-gray-200 bg-white">
         <button
           onClick={onCreateChat}
@@ -54,7 +54,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateChat, currentRoomId }) => {
           + Create New Chat
         </button>
 
-        {/* Search input */}
+        {/* search input */}
         <div className="relative">
           <input
             type="text"
@@ -79,7 +79,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onCreateChat, currentRoomId }) => {
         </div>
       </div>
 
-      {/* Chat Rooms List */}
+      {/* chat rooms list */}
       <div className="flex-1 overflow-y-auto">
         {filteredRooms.length === 0 ? (
           <div className="p-4 text-center text-gray-500">

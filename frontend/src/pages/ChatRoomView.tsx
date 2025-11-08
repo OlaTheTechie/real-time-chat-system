@@ -32,10 +32,10 @@ const ChatRoomView: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { toasts, hideToast } = useToast();
 
-  // Get access token for WebSocket
+  // get access token for websocket
   const token = localStorage.getItem('access_token');
 
-  // WebSocket connection
+  // websocket connection
   const {
     sendMessage: sendWebSocketMessage,
     connectionStatus,
@@ -44,18 +44,18 @@ const ChatRoomView: React.FC = () => {
     roomId: currentRoom?.id || null,
     token: token,
     onMessage: (message: Message) => {
-      // Add incoming WebSocket message to chat context
+      // add incoming websocket message to chat context
       addMessage(message);
     },
     onError: (error: Error) => {
       console.error('WebSocket error:', error);
       setWsError(error.message);
-      // Fall back to REST API after WebSocket error
+      // fall back to rest api after websocket error
       setUseRestFallback(true);
     },
   });
 
-  // Load room when component mounts or roomId changes
+  // load room when component mounts or roomid changes
   useEffect(() => {
     if (roomId) {
       const id = parseInt(roomId, 10);
@@ -66,7 +66,7 @@ const ChatRoomView: React.FC = () => {
     }
   }, [roomId, selectRoom]);
 
-  // Auto-scroll to latest message when new messages arrive
+  // auto-scroll to latest message when new messages arrive
   useEffect(() => {
     if (messages.length > 0 && !isLoadingMore) {
       scrollToBottom();
@@ -78,11 +78,20 @@ const ChatRoomView: React.FC = () => {
   };
 
   const handleSendMessage = async (content: string) => {
-    // Use WebSocket if connected, otherwise fall back to REST API
-    if (isConnected && !useRestFallback) {
-      sendWebSocketMessage(content);
-    } else {
-      await sendMessage(content);
+    console.log('Sending message:', { content, isConnected, useRestFallback, currentRoom: currentRoom?.id });
+    
+    try {
+      // use websocket if connected, otherwise fall back to rest api
+      if (isConnected && !useRestFallback) {
+        console.log('Using WebSocket to send message');
+        sendWebSocketMessage(content);
+      } else {
+        console.log('Using REST API to send message');
+        await sendMessage(content);
+      }
+      console.log('Message sent successfully');
+    } catch (error) {
+      console.error('Error sending message:', error);
     }
   };
 
@@ -97,7 +106,7 @@ const ChatRoomView: React.FC = () => {
       await loadMessages(currentRoom.id, nextPage);
       setCurrentPage(nextPage);
 
-      // Maintain scroll position after loading more messages
+      // maintain scroll position after loading more messages
       setTimeout(() => {
         if (messagesContainerRef.current) {
           const newScrollHeight = messagesContainerRef.current.scrollHeight;
@@ -115,7 +124,7 @@ const ChatRoomView: React.FC = () => {
     navigate('/chat');
   };
 
-  // Get room display name
+  // get room display name
   const getRoomName = () => {
     if (!currentRoom) return '';
     
@@ -123,12 +132,12 @@ const ChatRoomView: React.FC = () => {
       return currentRoom.name || 'Group Chat';
     }
     
-    // For one-to-one, show the other user's name
+    // for one-to-one, show the other user's name
     const otherMember = currentRoom.members.find(m => m.id !== user?.id);
     return otherMember?.username || 'Chat';
   };
 
-  // Get online members count
+  // get online members count
   const getOnlineMembersCount = () => {
     if (!currentRoom) return 0;
     return currentRoom.members.filter(m => m.is_online).length;
@@ -192,7 +201,7 @@ const ChatRoomView: React.FC = () => {
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
-      {/* Navbar */}
+      {/* navbar */}
       <Navbar
         showBackButton={!showSidebar}
         onBackClick={handleBackToList}
@@ -200,7 +209,7 @@ const ChatRoomView: React.FC = () => {
       />
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar - hidden on mobile by default, shown on desktop */}
+        {/* sidebar - hidden on mobile by default, shown on desktop */}
         {showSidebar && (
           <div className="hidden md:block">
             <Sidebar
@@ -210,13 +219,13 @@ const ChatRoomView: React.FC = () => {
           </div>
         )}
 
-        {/* Main chat area */}
+        {/* main chat area */}
         <div className="flex-1 flex flex-col">
-          {/* Room info bar */}
+          {/* room info bar */}
           <div className="bg-white border-b border-gray-200 px-4 py-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                {/* Connection status indicator */}
+                {/* connection status indicator */}
                 {connectionStatus === 'connected' && (
                   <span className="flex items-center gap-1 text-xs text-green-600">
                     <span className="w-2 h-2 bg-green-600 rounded-full"></span>
@@ -260,7 +269,7 @@ const ChatRoomView: React.FC = () => {
             </div>
           </div>
 
-          {/* Member list dropdown */}
+          {/* member list dropdown */}
           {showMemberList && currentRoom && (
             <div className="bg-white border-b border-gray-200 px-4 py-3">
               <h3 className="text-sm font-semibold text-gray-700 mb-2">Members</h3>
@@ -293,12 +302,12 @@ const ChatRoomView: React.FC = () => {
             </div>
           )}
 
-          {/* Messages container */}
+          {/* messages container */}
           <div
             ref={messagesContainerRef}
             className="flex-1 overflow-y-auto px-4 py-4 bg-gradient-to-b from-gray-50 to-white"
           >
-        {/* Load more button */}
+        {/* load more button */}
         {messages.length > 0 && hasMoreMessages && (
           <div className="text-center mb-4 animate-fade-in">
             <button
@@ -321,7 +330,7 @@ const ChatRoomView: React.FC = () => {
           </div>
         )}
 
-        {/* Empty state */}
+        {/* empty state */}
         {messages.length === 0 && !isLoading && (
           <div className="flex items-center justify-center h-full animate-fade-in">
             <div className="text-center text-gray-400">
@@ -344,7 +353,7 @@ const ChatRoomView: React.FC = () => {
           </div>
         )}
 
-        {/* Messages list */}
+        {/* messages list */}
         <div className="space-y-2">
           {messages.map((message) => (
             <MessageBubble
@@ -355,17 +364,17 @@ const ChatRoomView: React.FC = () => {
           ))}
         </div>
 
-            {/* Scroll anchor */}
+            {/* scroll anchor */}
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Message input */}
+          {/* message input */}
           <MessageInput onSendMessage={handleSendMessage} disabled={isLoading} />
 
         </div>
       </div>
 
-      {/* Toast Notifications */}
+      {/* toast notifications */}
       {toasts.map((toast) => (
         <Toast
           key={toast.id}
@@ -375,7 +384,7 @@ const ChatRoomView: React.FC = () => {
         />
       ))}
 
-      {/* Error toast */}
+      {/* error toast */}
       {error && (
         <Toast
           message={error}
@@ -385,7 +394,7 @@ const ChatRoomView: React.FC = () => {
         />
       )}
       
-      {/* WebSocket error toast */}
+      {/* websocket error toast */}
       {wsError && (
         <Toast
           message={`WebSocket: ${wsError} (Using REST fallback)`}
@@ -395,7 +404,7 @@ const ChatRoomView: React.FC = () => {
         />
       )}
 
-      {/* Create Chat Modal */}
+      {/* create chat modal */}
       <CreateChatModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}

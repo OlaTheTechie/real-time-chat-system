@@ -19,7 +19,7 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/password-reset" element={<PasswordReset />} />
 
-            {/* Protected routes */}
+            {/* protected routes */}
             <Route
               path="/chat"
               element={
@@ -37,7 +37,7 @@ function App() {
               }
             />
 
-            {/* Redirect root to chat if authenticated, otherwise login */}
+            {/* redirect root to chat if authenticated, otherwise login */}
             <Route path="/" element={<Navigate to="/chat" replace />} />
 
             {/* 404 page */}

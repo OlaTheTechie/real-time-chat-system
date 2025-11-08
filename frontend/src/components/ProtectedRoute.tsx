@@ -10,7 +10,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
 
-  // Show loading state while checking authentication
+  // show loading state while checking authentication
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -22,13 +22,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  // Redirect to login if not authenticated
+  // redirect to login if not authenticated
   if (!isAuthenticated) {
-    // Save the location they were trying to access
+    // save the location they were trying to access
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Render children if authenticated
+  // render children if authenticated
   return <>{children}</>;
 };
 

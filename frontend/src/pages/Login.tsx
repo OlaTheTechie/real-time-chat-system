@@ -24,14 +24,14 @@ const Login: React.FC = () => {
   const validateForm = (): boolean => {
     const newErrors: typeof errors = {};
     
-    // Email validation
+    // email validation
     if (!formData.email) {
       newErrors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
     
-    // Password validation
+    // password validation
     if (!formData.password) {
       newErrors.password = 'Password is required';
     }
@@ -43,10 +43,10 @@ const Login: React.FC = () => {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    // Clear previous errors
+    // clear previous errors
     setErrors({});
     
-    // Validate form
+    // validate form
     if (!validateForm()) {
       return;
     }
@@ -59,12 +59,23 @@ const Login: React.FC = () => {
         password: formData.password,
       });
       
-      // Redirect to chat list on successful login
+      // redirect to chat list on successful login
       navigate('/chat');
     } catch (error) {
       const axiosError = error as AxiosError<ApiError>;
+      const detail = axiosError.response?.data?.detail;
+      
+      // handle validation errors (array) or string errors
+      let errorMessage = 'Login failed. Please try again.';
+      if (typeof detail === 'string') {
+        errorMessage = detail;
+      } else if (Array.isArray(detail)) {
+        // format validation errors
+        errorMessage = detail.map(err => err.msg).join(', ');
+      }
+      
       setErrors({
-        general: axiosError.response?.data?.detail || 'Login failed. Please try again.',
+        general: errorMessage,
       });
     } finally {
       setIsSubmitting(false);
@@ -78,7 +89,7 @@ const Login: React.FC = () => {
       [name]: value,
     }));
     
-    // Clear error for this field when user starts typing
+    // clear error for this field when user starts typing
     if (errors[name as keyof typeof errors]) {
       setErrors((prev) => ({
         ...prev,

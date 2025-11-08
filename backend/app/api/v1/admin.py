@@ -1,172 +1,63 @@
 """
-Admin routes for managing users, chat rooms, and messages
+Admin routes using class-based views for managing users, chat rooms, and messages
 These routes are intended for development and testing purposes
 """
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from app.database.database import get_db
-from app.models.user import User
-from app.models.chat import ChatRoom, Message, RoomType
-from app.auth.dependencies import get_current_user
-from pydantic import BaseModel, EmailStr
-from datetime import datetime
+from app.api.v1.admin_views import AdminViews, UserAdmin, ChatRoomAdmin, MessageAdmin
 
 router = APIRouter()
 
 
-# Pydantic schemas for admin operations
-class UserAdmin(BaseModel):
-    id: int
-    email: str
-    username: str
-    is_online: bool
-    last_seen: datetime
-    created_at: datetime
-    
-    class Config:
-        from_attributes = True
-
-
-class ChatRoomAdmin(BaseModel):
-    id: int
-    name: Optional[str]
-    room_type: str
-    created_by: int
-    created_at: datetime
-    member_count: int
-    message_count: int
-    
-    class Config:
-        from_attributes = True
-
-
-class MessageAdmin(BaseModel):
-    id: int
-    room_id: int
-    sender_id: int
-    content: str
-    timestamp: datetime
-    message_type: str
-    is_edited: bool
-    
-    class Config:
-        from_attributes = True
-
-
-# User management routes
+# user management routes
 @router.get("/users", response_model=List[UserAdmin])
 async def list_users(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
     db: Session = Depends(get_db)
 ):
-    """
-    List all users with pagination
-    """
-    users = db.query(User).offset(skip).limit(limit).all()
-    return users
+    """List all users with pagination"""
+    return AdminViews.list_users(skip, limit, db)
 
 
 @router.get("/users/{user_id}", response_model=UserAdmin)
-async def get_user(
-    user_id: int,
-    db: Session = Depends(get_db)
-):
-    """
-    Get a specific user by ID
-    """
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
+async def get_user(user_id: int, db: Session = Depends(get_db)):
+    """Get a specific user by ID"""
+    return AdminViews.get_user(user_id, db)
 
 
 @router.delete("/users/{user_id}")
-async def delete_user(
-    user_id: int,
-    db: Session = Depends(get_db)
-):
-    """
-    Delete a user by ID
-    """
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    db.delete(user)
-    db.commit()
-    return {"message": f"User {user_id} deleted successfully"}
+async def delete_user(user_id: int, db: Session = Depends(get_db)):
+    """Delete a user by ID"""
+    return AdminViews.delete_user(user_id, db)
 
 
-# ChatRoom management routes
+# chatroom management routes
 @router.get("/chat-rooms", response_model=List[ChatRoomAdmin])
 async def list_chat_rooms(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
     db: Session = Depends(get_db)
 ):
-    """
-    List all chat rooms with pagination
-    """
-    rooms = db.query(ChatRoom).offset(skip).limit(limit).all()
-    
-    result = []
-    for room in rooms:
-        result.append(ChatRoomAdmin(
-            id=room.id,
-            name=room.name,
-            room_type=room.room_type.value,
-            created_by=room.created_by,
-            created_at=room.created_at,
-            member_count=len(room.members),
-            message_count=len(room.messages)
-        ))
-    
-    return result
+    """List all chat rooms with pagination"""
+    return AdminViews.list_chat_rooms(skip, limit, db)
 
 
 @router.get("/chat-rooms/{room_id}", response_model=ChatRoomAdmin)
-async def get_chat_room(
-    room_id: int,
-    db: Session = Depends(get_db)
-):
-    """
-    Get a specific chat room by ID
-    """
-    room = db.query(ChatRoom).filter(ChatRoom.id == room_id).first()
-    if not room:
-        raise HTTPException(status_code=404, detail="Chat room not found")
-    
-    return ChatRoomAdmin(
-        id=room.id,
-        name=room.name,
-        room_type=room.room_type.value,
-        created_by=room.created_by,
-        created_at=room.created_at,
-        member_count=len(room.members),
-        message_count=len(room.messages)
-    )
+async def get_chat_room(room_id: int, db: Session = Depends(get_db)):
+    """Get a specific chat room by ID"""
+    return AdminViews.get_chat_room(room_id, db)
 
 
 @router.delete("/chat-rooms/{room_id}")
-async def delete_chat_room(
-    room_id: int,
-    db: Session = Depends(get_db)
-):
-    """
-    Delete a chat room by ID
-    """
-    room = db.query(ChatRoom).filter(ChatRoom.id == room_id).first()
-    if not room:
-        raise HTTPException(status_code=404, detail="Chat room not found")
-    
-    db.delete(room)
-    db.commit()
-    return {"message": f"Chat room {room_id} deleted successfully"}
+async def delete_chat_room(room_id: int, db: Session = Depends(get_db)):
+    """Delete a chat room by ID"""
+    return AdminViews.delete_chat_room(room_id, db)
 
 
-# Message management routes
+# message management routes
 @router.get("/messages", response_model=List[MessageAdmin])
 async def list_messages(
     room_id: Optional[int] = None,
@@ -174,61 +65,24 @@ async def list_messages(
     limit: int = Query(100, ge=1, le=1000),
     db: Session = Depends(get_db)
 ):
-    """
-    List all messages with optional room filter and pagination
-    """
-    query = db.query(Message)
-    
-    if room_id:
-        query = query.filter(Message.room_id == room_id)
-    
-    messages = query.order_by(Message.timestamp.desc()).offset(skip).limit(limit).all()
-    return messages
+    """List all messages with optional room filter and pagination"""
+    return AdminViews.list_messages(room_id, skip, limit, db)
 
 
 @router.get("/messages/{message_id}", response_model=MessageAdmin)
-async def get_message(
-    message_id: int,
-    db: Session = Depends(get_db)
-):
-    """
-    Get a specific message by ID
-    """
-    message = db.query(Message).filter(Message.id == message_id).first()
-    if not message:
-        raise HTTPException(status_code=404, detail="Message not found")
-    return message
+async def get_message(message_id: int, db: Session = Depends(get_db)):
+    """Get a specific message by ID"""
+    return AdminViews.get_message(message_id, db)
 
 
 @router.delete("/messages/{message_id}")
-async def delete_message(
-    message_id: int,
-    db: Session = Depends(get_db)
-):
-    """
-    Delete a message by ID
-    """
-    message = db.query(Message).filter(Message.id == message_id).first()
-    if not message:
-        raise HTTPException(status_code=404, detail="Message not found")
-    
-    db.delete(message)
-    db.commit()
-    return {"message": f"Message {message_id} deleted successfully"}
+async def delete_message(message_id: int, db: Session = Depends(get_db)):
+    """Delete a message by ID"""
+    return AdminViews.delete_message(message_id, db)
 
 
-# Database statistics route
+# database statistics route
 @router.get("/stats")
 async def get_database_stats(db: Session = Depends(get_db)):
-    """
-    Get database statistics
-    """
-    user_count = db.query(User).count()
-    room_count = db.query(ChatRoom).count()
-    message_count = db.query(Message).count()
-    
-    return {
-        "users": user_count,
-        "chat_rooms": room_count,
-        "messages": message_count
-    }
+    """Get database statistics"""
+    return AdminViews.get_database_stats(db)

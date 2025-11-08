@@ -30,7 +30,7 @@ export const useWebSocket = ({
   const onMessageRef = useRef(onMessage);
   const onErrorRef = useRef(onError);
 
-  // Keep refs updated
+  // keep refs updated
   useEffect(() => {
     onMessageRef.current = onMessage;
   }, [onMessage]);
@@ -39,24 +39,24 @@ export const useWebSocket = ({
     onErrorRef.current = onError;
   }, [onError]);
 
-  // Connect/disconnect based on roomId and token
+  // connect/disconnect based on roomid and token
   useEffect(() => {
     if (!roomId || !token) {
-      // Disconnect if no roomId or token
+      // disconnect if no roomid or token
       websocketService.disconnect();
       setConnectionStatus('disconnected');
       return;
     }
 
-    // Connect to WebSocket
+    // connect to websocket
     websocketService.connect(roomId, token);
 
-    // Set up event listeners
+    // set up event listeners
     const unsubscribeMessage = websocketService.onMessage((message: Message) => {
-      // Add message to local state
+      // add message to local state
       setMessages((prev) => [...prev, message]);
 
-      // Call external callback if provided
+      // call external callback if provided
       if (onMessageRef.current) {
         onMessageRef.current(message);
       }
@@ -76,10 +76,10 @@ export const useWebSocket = ({
       }
     });
 
-    // Update initial status
+    // update initial status
     setConnectionStatus(websocketService.getStatus());
 
-    // Cleanup on unmount or when roomId/token changes
+    // cleanup on unmount or when roomid/token changes
     return () => {
       unsubscribeMessage();
       unsubscribeConnect();
@@ -90,7 +90,7 @@ export const useWebSocket = ({
     };
   }, [roomId, token]);
 
-  // Send message function
+  // send message function
   const sendMessage = useCallback(
     (content: string) => {
       if (!content.trim()) {
@@ -102,7 +102,7 @@ export const useWebSocket = ({
     []
   );
 
-  // Compute isConnected from status
+  // compute isconnected from status
   const isConnected = connectionStatus === 'connected';
 
   return {

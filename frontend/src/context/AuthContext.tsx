@@ -22,7 +22,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load user on mount if token exists
+  // load user on mount if token exists
   useEffect(() => {
     const initAuth = async () => {
       const token = localStorage.getItem('access_token');
@@ -31,7 +31,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           const currentUser = await authApi.getCurrentUser();
           setUser(currentUser);
         } catch (error) {
-          // Token invalid or expired, clear storage
+          // token invalid or expired, clear storage
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
         }
@@ -42,11 +42,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initAuth();
   }, []);
 
-  // Automatic token refresh logic
+  // automatic token refresh logic
   useEffect(() => {
     if (!user) return;
 
-    // Set up interval to refresh token every 25 minutes (before 30 min expiration)
+    // set up interval to refresh token every 25 minutes (before 30 min expiration)
     const refreshInterval = setInterval(
       async () => {
         const refreshToken = localStorage.getItem('refresh_token');
@@ -59,7 +59,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             }
           } catch (error) {
             console.error('Token refresh failed:', error);
-            // If refresh fails, log out user
+            // if refresh fails, log out user
             await logout();
           }
         }
@@ -74,11 +74,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const response = await authApi.login(data);
       
-      // Store tokens
+      // store tokens
       localStorage.setItem('access_token', response.access_token);
       localStorage.setItem('refresh_token', response.refresh_token);
 
-      // Fetch current user
+      // fetch current user
       const currentUser = await authApi.getCurrentUser();
       setUser(currentUser);
     } catch (error) {
@@ -89,7 +89,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = async (data: RegisterData) => {
     try {
       await authApi.register(data);
-      // After registration, user needs to login
+      // after registration, user needs to login
     } catch (error) {
       throw error;
     }
@@ -101,7 +101,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      // Clear local state and storage regardless of API call result
+      // clear local state and storage regardless of api call result
       setUser(null);
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
