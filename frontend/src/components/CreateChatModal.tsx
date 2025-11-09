@@ -24,20 +24,6 @@ const CreateChatModal: React.FC<CreateChatModalProps> = ({ isOpen, onClose }) =>
   const [error, setError] = useState<string | null>(null);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
 
-  // load users when modal opens
-  useEffect(() => {
-    if (isOpen) {
-      loadUsers();
-    } else {
-      // reset form when modal closes
-      setRoomType('one_to_one');
-      setRoomName('');
-      setSearchQuery('');
-      setSelectedUserIds([]);
-      setError(null);
-    }
-  }, [isOpen]);
-
   const loadUsers = async () => {
     setIsLoadingUsers(true);
     try {
@@ -52,6 +38,21 @@ const CreateChatModal: React.FC<CreateChatModalProps> = ({ isOpen, onClose }) =>
       setIsLoadingUsers(false);
     }
   };
+
+  // load users when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      loadUsers();
+    } else {
+      // reset form when modal closes
+      setRoomType('one_to_one');
+      setRoomName('');
+      setSearchQuery('');
+      setSelectedUserIds([]);
+      setError(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   const filteredUsers = allUsers.filter((user) =>
     user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||

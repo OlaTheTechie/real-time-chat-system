@@ -44,6 +44,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
       setCurrentRoom(null);
       setMessages([]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
   const loadRooms = useCallback(async () => {
@@ -85,6 +86,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const createRoom = useCallback(
