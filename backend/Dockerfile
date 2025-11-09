@@ -28,4 +28,4 @@ COPY . .
 EXPOSE 8000
 
 # run migrations and start application
-CMD alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000
+CMD echo "DATABASE_URL is: $DATABASE_URL" && alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000
