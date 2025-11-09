@@ -1,4 +1,3 @@
-import os
 from typing import List, Union
 from pydantic_settings import BaseSettings
 from pydantic import field_validator
@@ -10,19 +9,13 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     
     # database
-    DATABASE_URL: str = os.getenv(
-        "DATABASE_URL", 
-        "sqlite:///./chatserver.db"
-    )
+    DATABASE_URL: str = "sqlite:///./chatserver.db"
     
     # redis
-    REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379")
+    REDIS_URL: str = "redis://localhost:6379"
     
     # jwt
-    SECRET_KEY: str = os.getenv(
-        "SECRET_KEY", 
-        "your-secret-key-change-this-in-production"
-    )
+    SECRET_KEY: str = "your-secret-key-change-this-in-production"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
