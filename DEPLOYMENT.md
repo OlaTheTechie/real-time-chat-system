@@ -2,7 +2,7 @@
 
 ## Backend Deployment (Render with Docker)
 
-### Option 1: Using render.yaml (Recommended)
+### Recommended: Manual Setup (Simpler for Free Tier)
 
 1. **Push your code to GitHub**
 

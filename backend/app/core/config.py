@@ -28,14 +28,22 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     
     # cors
-    ALLOWED_HOSTS: List[str] = ["http://localhost:3000", "http://localhost:8501"]
+    ALLOWED_HOSTS: str = "http://localhost:3000,http://localhost:8501"
     
     @field_validator("ALLOWED_HOSTS", mode="before")
     @classmethod
     def assemble_cors_origins(cls, v):
         if isinstance(v, str):
             return [i.strip() for i in v.split(",")]
-        return v
+        elif isinstance(v, list):
+            return v
+        return [v]
+    
+    def get_allowed_hosts(self) -> List[str]:
+        """Get ALLOWED_HOSTS as a list"""
+        if isinstance(self.ALLOWED_HOSTS, str):
+            return [i.strip() for i in self.ALLOWED_HOSTS.split(",")]
+        return self.ALLOWED_HOSTS
     
     class Config:
         env_file = ".env"

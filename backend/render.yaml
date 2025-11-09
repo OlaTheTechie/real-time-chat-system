@@ -1,26 +1,13 @@
+databases:
+  - name: chatapp-db
+    databaseName: chatdb
+    user: chatuser
+    plan: free
+
 services:
-  # PostgreSQL Database
-  - type: pserv
-    name: chatapp-db
-    env: docker
-    plan: free
-    region: oregon
-    databases:
-      - name: chatdb
-        user: chatuser
-
-  # Redis
-  - type: redis
-    name: chatapp-redis
-    plan: free
-    region: oregon
-    maxmemoryPolicy: noeviction
-
-  # Backend API
   - type: web
     name: chatapp-backend
-    env: docker
-    region: oregon
+    runtime: docker
     plan: free
     dockerfilePath: ./Dockerfile
     dockerContext: ./
@@ -30,10 +17,7 @@ services:
           name: chatapp-db
           property: connectionString
       - key: REDIS_URL
-        fromService:
-          type: redis
-          name: chatapp-redis
-          property: connectionString
+        value: redis://localhost:6379
       - key: SECRET_KEY
         generateValue: true
       - key: ALGORITHM
@@ -43,5 +27,5 @@ services:
       - key: REFRESH_TOKEN_EXPIRE_DAYS
         value: 7
       - key: ALLOWED_HOSTS
-        value: 'https://your-frontend.vercel.app'
+        value: https://your-frontend.vercel.app
     healthCheckPath: /health
