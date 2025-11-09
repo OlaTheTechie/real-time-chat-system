@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Union
 from pydantic_settings import BaseSettings
 from pydantic import field_validator
 
@@ -28,22 +28,24 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     
     # cors
-    ALLOWED_HOSTS: str = "http://localhost:3000,http://localhost:8501"
+    ALLOWED_HOSTS: Union[str, List[str]] = "http://localhost:3000,http://localhost:8501"
     
     @field_validator("ALLOWED_HOSTS", mode="before")
     @classmethod
     def assemble_cors_origins(cls, v):
         if isinstance(v, str):
-            return [i.strip() for i in v.split(",")]
+            # Handle comma-separated string
+            return v.split(",") if "," in v else [v]
         elif isinstance(v, list):
+            # Already a list
             return v
-        return [v]
+        return [str(v)]
     
     def get_allowed_hosts(self) -> List[str]:
         """Get ALLOWED_HOSTS as a list"""
         if isinstance(self.ALLOWED_HOSTS, str):
             return [i.strip() for i in self.ALLOWED_HOSTS.split(",")]
-        return self.ALLOWED_HOSTS
+        return [i.strip() for i in self.ALLOWED_HOSTS]
     
     class Config:
         env_file = ".env"

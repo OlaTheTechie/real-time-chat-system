@@ -18,12 +18,9 @@ app = FastAPI(
 )
 
 # set up cors
-allowed_origins = settings.get_allowed_hosts() if hasattr(settings, 'get_allowed_hosts') else (
-    [i.strip() for i in settings.ALLOWED_HOSTS.split(",")] if isinstance(settings.ALLOWED_HOSTS, str) else settings.ALLOWED_HOSTS
-)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=settings.get_allowed_hosts(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
