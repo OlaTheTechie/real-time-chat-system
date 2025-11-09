@@ -10,10 +10,14 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from app.database.database import Base
 from app.models import User, ChatRoom, Message, PasswordResetToken  # import all models
+from app.core.config import settings
 
 # this is the alembic config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+
+# Override sqlalchemy.url with the one from settings (which reads from env vars)
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
 # interpret the config file for python logging.
 # this line sets up loggers basically.
