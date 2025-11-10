@@ -169,6 +169,17 @@ class AuthViews:
         return current_user
     
     @staticmethod
+    def get_all_users(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> list[UserResponse]:
+        """
+        Get all users for chat purposes
+        
+        Time Complexity: O(n) - where n is the number of users
+        Space Complexity: O(n)
+        """
+        users = db.query(User).all()
+        return users
+    
+    @staticmethod
     def request_password_reset(
         reset_request: PasswordResetRequest, 
         db: Session = Depends(get_db),

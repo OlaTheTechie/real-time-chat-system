@@ -50,6 +50,16 @@ def get_current_user_profile(current_user: User = Depends(get_current_user)):
     return AuthViews.get_current_user_profile(current_user)
 
 
+# get all users (for chat)
+@router.get("/users", response_model=list[UserResponse])
+def get_all_users(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get all users for chat purposes"""
+    return AuthViews.get_all_users(current_user, db)
+
+
 # password reset request
 @router.post("/password-reset")
 def request_password_reset(

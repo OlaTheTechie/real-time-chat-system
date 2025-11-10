@@ -226,9 +226,7 @@ export const chatApi = {
   },
 
   getAllUsers: async (): Promise<User[]> => {
-    const response = await apiClient.get<User[]>('/api/v1/admin/users', {
-      params: { limit: 1000 },
-    });
+    const response = await apiClient.get<User[]>('/api/v1/auth/users');
     return response.data;
   },
 };
