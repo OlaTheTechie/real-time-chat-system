@@ -52,6 +52,15 @@ fi
 
 echo ""
 echo "==================================="
+echo "running database migrations..."
+echo "==================================="
+echo ""
+
+# Run migration to add is_admin column if it doesn't exist
+python add_admin_column.py
+
+echo ""
+echo "==================================="
 echo "starting fastapi server..."
 echo "==================================="
 echo ""

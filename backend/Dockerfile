@@ -28,4 +28,7 @@ COPY . .
 EXPOSE 8000
 
 # run migrations and start application
-CMD echo "DATABASE_URL is: $DATABASE_URL" && alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000
+CMD echo "Running database migrations..." && \
+    python add_admin_column.py && \
+    echo "Starting server..." && \
+    uvicorn app.main:app --host 0.0.0.0 --port 8000
