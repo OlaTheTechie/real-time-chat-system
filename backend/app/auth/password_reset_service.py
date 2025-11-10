@@ -12,7 +12,15 @@ from app.core.security import get_password_hash
 class PasswordResetService:
     def __init__(self, db: Session, redis_client=None):
         self.db = db
-        self.redis_client = redis_client or get_redis()
+        try:
+            self.redis_client = redis_client or get_redis()
+            # Test Redis connection
+            self.redis_client.ping()
+            self.redis_available = True
+        except Exception as e:
+            print(f"Redis not available, using database only: {e}")
+            self.redis_client = None
+            self.redis_available = False
         self.token_expiry_minutes = 30
     
     def generate_reset_token(self) -> str:
@@ -39,38 +47,46 @@ class PasswordResetService:
         self.db.add(reset_token)
         
         # also store in redis for faster lookup (optional but recommended)
-        redis_key = f"password_reset:{token}"
-        redis_value = f"{user.id}:{user.email}"
-        self.redis_client.setex(
-            redis_key, 
-            timedelta(minutes=self.token_expiry_minutes), 
-            redis_value
-        )
+        if self.redis_available:
+            try:
+                redis_key = f"password_reset:{token}"
+                redis_value = f"{user.id}:{user.email}"
+                self.redis_client.setex(
+                    redis_key, 
+                    timedelta(minutes=self.token_expiry_minutes), 
+                    redis_value
+                )
+            except Exception as e:
+                print(f"Redis error (non-critical): {e}")
         
         self.db.commit()
         return token
     
     def verify_reset_token(self, token: str) -> Optional[User]:
         """Verify a password reset token and return the associated user"""
-        # first check redis for faster lookup
-        redis_key = f"password_reset:{token}"
-        redis_value = self.redis_client.get(redis_key)
-        
-        if redis_value:
-            # handle both bytes and string responses from redis
-            if isinstance(redis_value, bytes):
-                redis_value = redis_value.decode()
-            user_id = int(redis_value.split(':')[0])
-            user = self.db.query(User).filter(User.id == user_id).first()
-            
-            # also verify in database
-            db_token = self.db.query(PasswordResetToken).filter(
-                PasswordResetToken.token == token,
-                PasswordResetToken.user_id == user_id
-            ).first()
-            
-            if db_token and not db_token.is_expired() and not db_token.is_used():
-                return user
+        # first check redis for faster lookup (if available)
+        if self.redis_available:
+            try:
+                redis_key = f"password_reset:{token}"
+                redis_value = self.redis_client.get(redis_key)
+                
+                if redis_value:
+                    # handle both bytes and string responses from redis
+                    if isinstance(redis_value, bytes):
+                        redis_value = redis_value.decode()
+                    user_id = int(redis_value.split(':')[0])
+                    user = self.db.query(User).filter(User.id == user_id).first()
+                    
+                    # also verify in database
+                    db_token = self.db.query(PasswordResetToken).filter(
+                        PasswordResetToken.token == token,
+                        PasswordResetToken.user_id == user_id
+                    ).first()
+                    
+                    if db_token and not db_token.is_expired() and not db_token.is_used():
+                        return user
+            except Exception as e:
+                print(f"Redis error (non-critical), falling back to database: {e}")
         
         # fallback to database-only lookup
         db_token = self.db.query(PasswordResetToken).filter(
@@ -100,9 +116,13 @@ class PasswordResetService:
         if db_token:
             db_token.mark_as_used()
         
-        # remove from redis
-        redis_key = f"password_reset:{token}"
-        self.redis_client.delete(redis_key)
+        # remove from redis (if available)
+        if self.redis_available:
+            try:
+                redis_key = f"password_reset:{token}"
+                self.redis_client.delete(redis_key)
+            except Exception as e:
+                print(f"Redis error (non-critical): {e}")
         
         self.db.commit()
         return True
@@ -114,9 +134,13 @@ class PasswordResetService:
         ).all()
         
         for token in expired_tokens:
-            # remove from redis if exists
-            redis_key = f"password_reset:{token.token}"
-            self.redis_client.delete(redis_key)
+            # remove from redis if exists and available
+            if self.redis_available:
+                try:
+                    redis_key = f"password_reset:{token.token}"
+                    self.redis_client.delete(redis_key)
+                except Exception as e:
+                    print(f"Redis error (non-critical): {e}")
             
             # remove from database
             self.db.delete(token)

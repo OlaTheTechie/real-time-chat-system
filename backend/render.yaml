@@ -5,6 +5,13 @@ databases:
     plan: free
 
 services:
+  # Redis service for caching and real-time features
+  - type: redis
+    name: chatapp-redis
+    plan: free
+    maxmemoryPolicy: noeviction
+    ipAllowList: []  # Only allow internal connections
+
   - type: web
     name: chatapp-backend
     runtime: docker
@@ -17,7 +24,10 @@ services:
           name: chatapp-db
           property: connectionString
       - key: REDIS_URL
-        value: redis://localhost:6379
+        fromService:
+          type: redis
+          name: chatapp-redis
+          property: connectionString
       - key: SECRET_KEY
         generateValue: true
       - key: ALGORITHM
