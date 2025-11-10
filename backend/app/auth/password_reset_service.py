@@ -7,6 +7,7 @@ from app.database.redis_client import get_redis
 from app.models.user import User
 from app.models.password_reset import PasswordResetToken
 from app.core.security import get_password_hash
+from app.core.email import email_service
 
 
 class PasswordResetService:
@@ -28,7 +29,7 @@ class PasswordResetService:
         alphabet = string.ascii_letters + string.digits
         return ''.join(secrets.choice(alphabet) for _ in range(32))
     
-    def create_reset_token(self, email: str) -> Optional[str]:
+    def create_reset_token(self, email: str, send_email: bool = True) -> Optional[str]:
         """Create a password reset token for the given email"""
         # find user by email
         user = self.db.query(User).filter(User.email == email).first()
@@ -60,6 +61,14 @@ class PasswordResetService:
                 print(f"Redis error (non-critical): {e}")
         
         self.db.commit()
+        
+        # send email with reset link
+        if send_email:
+            try:
+                email_service.send_password_reset_email(email, token)
+            except Exception as e:
+                print(f"Email sending error (non-critical): {e}")
+        
         return token
     
     def verify_reset_token(self, token: str) -> Optional[User]:

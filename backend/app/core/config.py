@@ -23,6 +23,19 @@ class Settings(BaseSettings):
     # cors
     ALLOWED_HOSTS: Union[str, List[str]] = "http://localhost:3000,http://localhost:8501"
     
+    # email settings
+    EMAIL_ENABLED: bool = False
+    EMAIL_FROM: str = "noreply@chatapp.com"
+    EMAIL_FROM_NAME: str = "Chat App"
+    FRONTEND_URL: str = "http://localhost:3000"
+    
+    # SMTP settings
+    SMTP_HOST: str = "smtp.gmail.com"
+    SMTP_PORT: int = 587
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_TLS: bool = True
+    
     @field_validator("ALLOWED_HOSTS", mode="before")
     @classmethod
     def assemble_cors_origins(cls, v):

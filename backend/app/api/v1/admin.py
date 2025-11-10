@@ -1,14 +1,16 @@
 """
 Admin routes using class-based views for managing users, chat rooms, and messages
-These routes are intended for development and testing purposes
+These routes are protected and require admin access
 """
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from app.database.database import get_db
 from app.api.v1.admin_views import AdminViews, UserAdmin, ChatRoomAdmin, MessageAdmin
+from app.auth.dependencies import get_current_admin_user
+from app.models.user import User
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_admin_user)])
 
 
 # user management routes

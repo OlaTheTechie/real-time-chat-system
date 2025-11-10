@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 from app.core.config import settings
 from app.api.v1.api import api_router
 from app.chat.ws_routes import router as ws_router
@@ -16,6 +17,9 @@ app = FastAPI(
     description="A realtime chat server built with FastAPI",
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
+
+# add session middleware for admin authentication
+app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
 # set up cors
 app.add_middleware(

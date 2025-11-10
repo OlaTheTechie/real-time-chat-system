@@ -181,21 +181,12 @@ class AuthViews:
         Space Complexity: O(1) - token string
         """
         reset_service = PasswordResetService(db, redis_client)
-        token = reset_service.create_reset_token(reset_request.email)
+        token = reset_service.create_reset_token(reset_request.email, send_email=True)
         
-        if token:
-            # in a real application, you would send this token via email
-            # for now, we'll return it in the response for testing purposes
-            return {
-                "message": "Password reset token generated successfully",
-                "token": token,  # remove this in production - send via email instead
-                "note": "In production, this token would be sent via email"
-            }
-        else:
-            # don't reveal whether the email exists or not for security
-            return {
-                "message": "If the email exists, a password reset token has been sent"
-            }
+        # Always return the same message for security (don't reveal if email exists)
+        return {
+            "message": "If the email exists, a password reset link has been sent to your email address"
+        }
     
     @staticmethod
     def confirm_password_reset(

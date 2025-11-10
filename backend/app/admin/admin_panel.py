@@ -3,15 +3,20 @@ Admin Panel using SQLAdmin for FastAPI
 Provides a web-based interface to manage all models
 """
 from sqladmin import Admin, ModelView
+from sqladmin.authentication import AuthenticationBackend
+from starlette.requests import Request
+from starlette.responses import RedirectResponse
 from app.models.user import User
 from app.models.chat import ChatRoom, Message
 from app.models.password_reset import PasswordResetToken
+from app.core.security import verify_password, verify_token
+from app.database.database import SessionLocal
 
 
 class UserAdmin(ModelView, model=User):
     """Admin view for User model"""
     
-    column_list = [User.id, User.username, User.email, User.is_online, User.created_at, User.last_seen]
+    column_list = [User.id, User.username, User.email, User.is_admin, User.is_online, User.created_at, User.last_seen]
     column_searchable_list = [User.username, User.email]
     column_sortable_list = [User.id, User.username, User.email, User.created_at]
     column_default_sort = [(User.created_at, True)]
@@ -20,14 +25,15 @@ class UserAdmin(ModelView, model=User):
     column_details_list = [
         User.id, 
         User.username, 
-        User.email, 
+        User.email,
+        User.is_admin,
         User.is_online, 
         User.created_at, 
         User.last_seen
     ]
     
     # fields that can be edited (exclude password)
-    form_columns = [User.username, User.email, User.is_online]
+    form_columns = [User.username, User.email, User.is_admin, User.is_online]
     
     name = "User"
     name_plural = "Users"
@@ -149,6 +155,47 @@ class PasswordResetTokenAdmin(ModelView, model=PasswordResetToken):
     icon = "fa-solid fa-key"
 
 
+class AdminAuth(AuthenticationBackend):
+    """Authentication backend for SQLAdmin"""
+    
+    async def login(self, request: Request) -> bool:
+        """Handle login form submission"""
+        form = await request.form()
+        username = form.get("username")
+        password = form.get("password")
+        
+        db = SessionLocal()
+        try:
+            user = db.query(User).filter(User.username == username).first()
+            
+            if user and verify_password(password, user.hashed_password) and user.is_admin:
+                # store user_id in session
+                request.session.update({"user_id": user.id})
+                return True
+            return False
+        finally:
+            db.close()
+    
+    async def logout(self, request: Request) -> bool:
+        """Handle logout"""
+        request.session.clear()
+        return True
+    
+    async def authenticate(self, request: Request) -> bool:
+        """Check if user is authenticated"""
+        user_id = request.session.get("user_id")
+        
+        if not user_id:
+            return False
+        
+        db = SessionLocal()
+        try:
+            user = db.query(User).filter(User.id == user_id).first()
+            return user is not None and user.is_admin
+        finally:
+            db.close()
+
+
 def setup_admin(app, engine):
     """
     Setup admin panel for the FastAPI application
@@ -160,11 +207,15 @@ def setup_admin(app, engine):
     Returns:
         Admin instance
     """
+    from app.core.config import settings
+    authentication_backend = AdminAuth(secret_key=settings.SECRET_KEY)
+    
     admin = Admin(
         app, 
         engine,
         title="Chat Server Admin",
-        base_url="/admin"
+        base_url="/admin",
+        authentication_backend=authentication_backend
     )
     
     # add model views

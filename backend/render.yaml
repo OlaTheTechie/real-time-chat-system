@@ -38,4 +38,24 @@ services:
         value: 7
       - key: ALLOWED_HOSTS
         value: https://your-frontend.vercel.app
+      # Email Configuration
+      - key: EMAIL_ENABLED
+        value: true
+      - key: EMAIL_FROM
+        value: noreply@chatapp.com
+      - key: EMAIL_FROM_NAME
+        value: Chat App
+      - key: FRONTEND_URL
+        value: https://your-frontend.vercel.app
+      # SMTP Settings (Add these manually in Render Dashboard as secrets)
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_USER
+        sync: false  # Add manually in dashboard
+      - key: SMTP_PASSWORD
+        sync: false  # Add manually in dashboard as secret
+      - key: SMTP_TLS
+        value: true
     healthCheckPath: /health
