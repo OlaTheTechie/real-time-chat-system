@@ -57,7 +57,10 @@ class PasswordResetService:
         redis_value = self.redis_client.get(redis_key)
         
         if redis_value:
-            user_id = int(redis_value.decode().split(':')[0])
+            # handle both bytes and string responses from redis
+            if isinstance(redis_value, bytes):
+                redis_value = redis_value.decode()
+            user_id = int(redis_value.split(':')[0])
             user = self.db.query(User).filter(User.id == user_id).first()
             
             # also verify in database
